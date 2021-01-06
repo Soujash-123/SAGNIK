@@ -9,6 +9,8 @@ import os
 from turtle import *
 import pywhatkit as kit
 import wikipedia
+import PyPDF2
+from tkinter.filedialog import *
 engine=pyttsx3.init()
 voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[0].id) #changing index changes voices but ony 0 and 1 are working here
@@ -169,17 +171,19 @@ def window():
         var = StringVar()
         label = Label( textvariable=var, relief=RAISED ,bg="white")
         var.set(response(input_get))
-        speak(response(input_get))
+        'speak(response(input_get))'
+        label.pack_propagate(True)
         label.pack()
-        label.place(height=600, width=800,x=0,y=120)
+        label.place(x=0,y=120)
         label = Label(frame, text=input_get,relief=RAISED,bg="pale green")
         input_user.set('')
+        label.pack_propagate(True)
         label.pack()
-        label.place(height=100,width=210,x=90,y=0)
+        label.place(x=1390,y=0)
         return "break"
 
-    frame = Frame(window, width=900, height=900)
-    frame.pack_propagate(False) # prevent frame to resize to the labels size
+    frame = Frame(window, width=1600, height=600)
+    frame.pack_propagate(True) # to resize frame according to the labels size
     input_field.bind("<Return>", enter_pressed)
     frame.pack()
     btn1 = Button(window, text ="Exit", command = window.destroy).pack()
@@ -277,6 +281,7 @@ def response(cmd):
     religion=["do you believe in god","what is your religion","are you an aethist"]
     bday=["when was your birthday","when were you born","when is your bday","when was your bday","when is your birthday"]
     default=["I see","hmmmm","okay","ok","ha"]
+    adbk=["read me a pdf","read me a file"]
     if cmd in greetings:
         return "Hey There,buddy!!"
     elif cmd in default:
@@ -296,6 +301,8 @@ def response(cmd):
             st="Actually sir you should be \n wishing "+a+"\n and not "+cmd+"."+"\n Neverthless "+a+" ,sir!" 
             return st
     
+    elif cmd in adbk:
+        Audiobook()
     elif "news" in a:
         webbrowser.open("news.google.com")
         return "opening news website(Could nnot search for specifics as news.google.com declined permission"
@@ -471,8 +478,59 @@ def response(cmd):
                         return s
                     
                             
-            
-           
+
+def Audiobook():
+
+    window.destroy()
+    def Accept():
+            root.destroy()
+            window=Tk()
+            frame = Frame(window, width=300, height=80)
+            frame.pack_propagate(False) # prevent frame to resize to the labels size
+            frame.pack()
+            Label(text="What type of file do you want me to read").pack()
+            p_button=Button(window,text="PDF",command=pdf)
+            p_button.pack()
+            p_button.place(width=50,x=120,y=30)
+            t_button=Button(window,text="TXT",command=txt)
+            t_button.pack()
+            t_button.place(width=50,x=120,y=60)
+    def Decline():
+            Label(text="Sorry could not access the contents of your computer").pack()
+    def pdf():
+        window=Tk()
+        book = askopenfilename()
+        reader= PyPDF2.PdfFileReader(book)
+        pages = reader.numPages
+        window.mainloop()
+        for num in range(0,pages):
+            page = reader.getPage(num)
+            txt = page.extractText()
+            speak(txt)
+            print(txt)
+        window.destroy()
+    def txt():
+        window=Tk()
+        book = askopenfilename()
+        file=open(book)
+        speak(file.read())
+        print(file.read())
+        file.close()
+        window.destroy()
+        
+    root=Tk()
+    frame = Frame(root, width=300, height=80)
+    frame.pack_propagate(False) # prevent frame to resize to the labels size
+    label1=Label(text="SAGNIK would like to access the files on your computer")
+    label1.pack()
+    a_button=Button(root,text="Allow",command=Accept)
+    a_button.pack()
+    a_button.place(width=50,x=120,y=30)
+    d_button=Button(root,text="Deny",command=Decline)
+    d_button.pack()
+    d_button.place(width=50,x=120,y=60)
+    frame.pack()
+    root.mainloop()
 def Train():
         q=["","","","",""]
         file=open("intents.txt","a+")
